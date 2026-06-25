@@ -1,9 +1,0 @@
-{
-  "name": "VNL Общий заказ",
-  "short_name": "VNL",
-  "start_url": "./index.html",
-  "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#111110",
-  "icons": []
-}
