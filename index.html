@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VNL — Общий заказ</title>
+<!-- build: single-tab-fixed-v2 -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#111110">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="VNL Заказ">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg:#ffffff; --bg2:#f5f5f4; --bg3:#ececea; --text:#111110; --text2:#6b6b68;
+  --text3:#b0b0ad; --border:#e8e8e5; --border2:#d4d4d0; --accent:#111110;
+  --accent-t:#ffffff; --danger:#dc2626; --green:#16a34a; --r:12px; --r-sm:7px;
+}
+@media (prefers-color-scheme: dark) {
+  :root { --bg:#111110; --bg2:#1c1c1b; --bg3:#272726; --text:#f0efed; --text2:#9a9a97;
+  --text3:#5a5a57; --border:#2e2e2c; --border2:#3e3e3c; --accent:#f0efed; --accent-t:#111110; }
+}
+body {
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;
+  background:var(--bg2); color:var(--text); min-height:100vh; font-size:14px; -webkit-font-smoothing:antialiased;
+}
+.topbar { background:var(--bg); border-bottom:1px solid var(--border); padding:0 16px; position:sticky; top:0; z-index:50; display:flex; align-items:center; height:52px; gap:14px; }
+.logo { font-size:18px; font-weight:800; letter-spacing:-0.04em; color:var(--text); line-height:1; padding:5px 9px; border:1.5px solid var(--text); border-radius:5px; flex-shrink:0; }
+.topbar-divider { width:1px; height:20px; background:var(--border); flex-shrink:0; }
+.topbar-label { font-size:13px; color:var(--text2); font-weight:400; }
+.main { max-width:600px; margin:0 auto; padding:20px 14px 40px; }
+.card { background:var(--bg); border:1px solid var(--border); border-radius:var(--r); overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,0.04); }
+.card-header { padding:13px 14px; display:flex; align-items:flex-start; justify-content:space-between; gap:10px; border-bottom:1px solid var(--border); }
+.card-title { font-size:13px; font-weight:600; color:var(--text); letter-spacing:-0.01em; }
+.card-sub { font-size:11px; color:var(--text3); margin-top:2px; }
+.header-btns { display:flex; gap:6px; flex-shrink:0; }
+.copy-btn,.clear-btn { display:flex; align-items:center; gap:5px; font-size:12px; font-weight:500; padding:6px 11px; border:1px solid var(--border2); border-radius:var(--r-sm); background:var(--bg2); color:var(--text2); cursor:pointer; white-space:nowrap; flex-shrink:0; transition:all .13s; -webkit-tap-highlight-color:transparent; }
+.copy-btn:active,.clear-btn:active { background:var(--bg3); }
+.copy-btn.ok { color:var(--green); border-color:var(--green); background:#f0fdf4; }
+.clear-btn:active { color:var(--danger); border-color:var(--danger); }
+table { width:100%; border-collapse:collapse; }
+thead th { font-size:10px; font-weight:600; color:var(--text3); text-transform:uppercase; letter-spacing:.07em; padding:8px 12px; text-align:left; background:var(--bg2); border-bottom:1px solid var(--border); }
+.th-unit,.th-qty,.th-del { width:56px; text-align:center!important; }
+.th-del { width:38px; }
+tbody tr { border-bottom:1px solid var(--border); }
+tbody tr:last-child { border-bottom:none; }
+td { padding:0; font-size:13px; color:var(--text); vertical-align:middle; }
+.cell-input { width:100%; padding:9px 12px; font-size:13px; color:var(--text); background:transparent; border:none; outline:none; font-family:inherit; }
+.cell-input:focus { background:var(--bg2); }
+.td-unit { width:56px; }
+.td-unit .cell-input { text-align:center; color:var(--text2); font-size:12px; padding:9px 4px; }
+.td-qty { width:68px; }
+.td-qty input[type=number] { width:52px; font-size:13px; padding:5px 6px; border:1px solid var(--border2); border-radius:var(--r-sm); background:var(--bg); color:var(--text); text-align:center; font-family:inherit; -moz-appearance:textfield; display:block; margin:0 auto; }
+.td-qty input[type=number]::-webkit-outer-spin-button,.td-qty input[type=number]::-webkit-inner-spin-button { -webkit-appearance:none; }
+.td-qty input[type=number]:focus { outline:none; border-color:var(--text2); }
+.td-del { width:38px; }
+.del-btn { background:none; border:none; cursor:pointer; color:var(--text3); padding:8px; display:flex; align-items:center; justify-content:center; width:100%; transition:color .13s; -webkit-tap-highlight-color:transparent; }
+.del-btn:active { color:var(--danger); }
+.add-row { display:flex; gap:6px; padding:10px 12px; border-top:1px solid var(--border); background:var(--bg2); align-items:center; }
+.add-row input[type=text] { flex:1; min-width:0; font-size:13px; padding:7px 10px; border:1px solid var(--border2); border-radius:var(--r-sm); background:var(--bg); color:var(--text); font-family:inherit; }
+.add-row input[type=text]:focus { outline:none; border-color:var(--text2); }
+.add-row input[type=text]::placeholder { color:var(--text3); }
+.add-row .uf { width:52px; flex:none; }
+.add-btn { padding:7px 12px; border:1px solid var(--border2); border-radius:var(--r-sm); background:var(--bg); color:var(--text); font-size:12px; font-weight:500; cursor:pointer; white-space:nowrap; flex-shrink:0; font-family:inherit; transition:background .13s; -webkit-tap-highlight-color:transparent; }
+.add-btn:active { background:var(--bg3); }
+.modal-bg { display:none; position:fixed; inset:0; background:rgba(0,0,0,.4); z-index:200; align-items:flex-end; justify-content:center; padding:0; }
+@media (min-width:480px) { .modal-bg { align-items:center; padding:20px; } }
+.modal-bg.open { display:flex; }
+.modal { background:var(--bg); border-radius:var(--r) var(--r) 0 0; border:1px solid var(--border); padding:20px; width:100%; max-width:420px; animation:slideup .18s ease; }
+@media (min-width:480px) { .modal { border-radius:var(--r); } }
+@keyframes slideup { from { transform:translateY(24px); opacity:0; } to { transform:none; opacity:1; } }
+.modal-handle { width:36px; height:4px; background:var(--border2); border-radius:2px; margin:0 auto 16px; display:block; }
+@media (min-width:480px) { .modal-handle { display:none; } }
+.modal h3 { font-size:14px; font-weight:600; color:var(--text); margin-bottom:12px; letter-spacing:-0.01em; }
+.modal textarea { width:100%; height:210px; font-size:12px; font-family:'SF Mono','Fira Code','Menlo',monospace; padding:12px; border:1px solid var(--border2); border-radius:var(--r-sm); background:var(--bg2); color:var(--text); resize:none; line-height:1.75; }
+.modal textarea:focus { outline:none; }
+.modal-footer { display:flex; gap:8px; margin-top:12px; justify-content:flex-end; }
+.btn-close,.btn-copy-modal { padding:8px 16px; border-radius:var(--r-sm); font-size:13px; font-family:inherit; cursor:pointer; -webkit-tap-highlight-color:transparent; }
+.btn-close { border:1px solid var(--border2); background:none; color:var(--text2); }
+.btn-copy-modal { border:none; background:var(--accent); color:var(--accent-t); font-weight:500; display:flex; align-items:center; gap:5px; transition:opacity .13s; }
+.btn-copy-modal:active { opacity:.85; }
+</style>
+</head>
+<body>
+<div class="topbar"><div class="logo">VNL</div><div class="topbar-divider"></div><div class="topbar-label">Общий заказ</div></div>
+<div class="main">
+  <div class="card">
+    <div class="card-header">
+      <div><div class="card-title">Общий список</div><div class="card-sub">Все позиции в одной таблице</div></div>
+      <div class="header-btns">
+        <button class="clear-btn" onclick="clearQty()">Очистить</button>
+        <button class="copy-btn" onclick="openCopy()">Копировать</button>
+      </div>
+    </div>
+    <table><thead><tr><th>Наименование</th><th class="th-unit">Ед.</th><th class="th-qty">Кол-во</th><th class="th-del"></th></tr></thead><tbody id="tbody"></tbody></table>
+    <div class="add-row">
+      <input type="text" id="new-name" placeholder="Новая позиция">
+      <input type="text" class="uf" id="new-unit" placeholder="шт">
+      <button class="add-btn" onclick="addItem()">+ Добавить</button>
+    </div>
+  </div>
+</div>
+<div class="modal-bg" id="modal">
+  <div class="modal">
+    <span class="modal-handle"></span><h3 id="modal-title">Сообщение</h3>
+    <textarea id="modal-text" readonly></textarea>
+    <div class="modal-footer"><button class="btn-close" onclick="closeModal()">Закрыть</button><button class="btn-copy-modal" id="modal-copy-btn" onclick="copyModal()">Копировать</button></div>
+  </div>
+</div>
+<script>
+const KEY='vnl_single_order_v1';
+const DEFAULT=[
+  {
+    "name": "Безлактозное молоко Parmalant 1,8%",
+    "unit": "шт",
+    "qty": ""
+  },
+  {
+    "name": "Молоко Velle овсяное",
+    "unit": "шт",
+    "qty": ""
+  },
+  {
+    "name": "Молоко Velle кокосовое",
+    "unit": "шт",
+    "qty": ""
+  },
+  {
+    "name": "Молоко Velle банановое",
+    "unit": "шт",
+    "qty": ""
+  },
+  {
+    "name": "Молоко Velle фундучное",
+    "unit": "шт",
+    "qty": ""
+  },
+  {
+    "name": "Молоко Velle миндальное",
+    "unit": "шт",
+    "qty": ""
+  },
+  {
+    "name": "Сироп Herbarista Choco Bomb",
+    "unit": "шт",
+    "qty": ""
+  },
+  {
+    "name": "Сироп Herbarista Nutcracker",
+    "unit": "шт",
+    "qty": ""
+  },
+  {
+    "name": "Сироп Herbarista Double Burn Caramel",
+    "unit": "шт",
+    "qty": ""
+  },
+  {
+    "name": "Сироп Herbarista Bourbon Vanilla",
+    "unit": "шт",
+    "qty": ""
+  },
+  {
+    "name": "Сироп Herbarista Pistachio",
+    "unit": "шт",
+    "qty": ""
+  },
+  {
+    "name": "Тоник Rich классический",
+    "unit": "шт",
+    "qty": ""
+  },
+  {
+    "name": "Концентрат ежевика",
+    "unit": "шт",
+    "qty": ""
+  },
+  {
+    "name": "Какао",
+    "unit": "шт",
+    "qty": ""
+  },
+  {
+    "name": "Сливки EcoNiva 10%",
+    "unit": "шт",
+    "qty": ""
+  },
+  {
+    "name": "Молоко 3,2% EcoNiva",
+    "unit": "шт",
+    "qty": ""
+  },
+  {
+    "name": "Пюре личи",
+    "unit": "шт",
+    "qty": ""
+  },
+  {
+    "name": "Пюре питахайа",
+    "unit": "шт",
+    "qty": ""
+  },
+  {
+    "name": "Пюре фейхоа",
+    "unit": "шт",
+    "qty": ""
+  },
+  {
+    "name": "Пюре яблоко Гренни Смит",
+    "unit": "шт",
+    "qty": ""
+  },
+  {
+    "name": "Сироп малина",
+    "unit": "шт",
+    "qty": ""
+  },
+  {
+    "name": "Матча зеленая",
+    "unit": "шт",
+    "qty": ""
+  },
+  {
+    "name": "Гречишный чай",
+    "unit": "шт",
+    "qty": ""
+  },
+  {
+    "name": "Таежный чай",
+    "unit": "шт",
+    "qty": ""
+  },
+  {
+    "name": "Шиповник",
+    "unit": "шт",
+    "qty": ""
+  },
+  {
+    "name": "Тегуаньнинь",
+    "unit": "шт",
+    "qty": ""
+  },
+  {
+    "name": "Спокойствие вершин",
+    "unit": "шт",
+    "qty": ""
+  },
+  {
+    "name": "Изысканный бергамот",
+    "unit": "шт",
+    "qty": ""
+  },
+  {
+    "name": "Зеленый с кактусом",
+    "unit": "шт",
+    "qty": ""
+  },
+  {
+    "name": "Имбирный лимонник",
+    "unit": "шт",
+    "qty": ""
+  },
+  {
+    "name": "Да хун паон",
+    "unit": "шт",
+    "qty": ""
+  },
+  {
+    "name": "Дянь хунь",
+    "unit": "шт",
+    "qty": ""
+  },
+  {
+    "name": "Сок апельсин",
+    "unit": "шт",
+    "qty": ""
+  },
+  {
+    "name": "Мед",
+    "unit": "шт",
+    "qty": ""
+  },
+  {
+    "name": "Турка",
+    "unit": "шт",
+    "qty": ""
+  },
+  {
+    "name": "Сахар стик",
+    "unit": "шт",
+    "qty": ""
+  },
+  {
+    "name": "Сок кр. апельсин",
+    "unit": "шт",
+    "qty": ""
+  },
+  {
+    "name": "Трубочки",
+    "unit": "шт",
+    "qty": ""
+  },
+  {
+    "name": "Сахар 5кг",
+    "unit": "шт",
+    "qty": ""
+  },
+  {
+    "name": "Палки мешалки",
+    "unit": "шт",
+    "qty": ""
+  },
+  {
+    "name": "Салфетки",
+    "unit": "шт",
+    "qty": ""
+  },
+  {
+    "name": "Подставки для стаканов",
+    "unit": "шт",
+    "qty": ""
+  }
+];
+let state=[];
+function deep(x){return JSON.parse(JSON.stringify(x));}
+function load(){try{const r=localStorage.getItem(KEY);state=r?JSON.parse(r):deep(DEFAULT);}catch(e){state=deep(DEFAULT);}render();}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(state));}catch(e){}}
+function render(){
+  const tbody=document.getElementById('tbody'); tbody.innerHTML='';
+  state.forEach((item,idx)=>{
+    const tr=document.createElement('tr');
+    const tdName=document.createElement('td');
+    const nameInp=document.createElement('input'); nameInp.type='text'; nameInp.className='cell-input'; nameInp.value=item.name;
+    nameInp.addEventListener('change',()=>{item.name=nameInp.value.trim()||item.name;save();}); tdName.appendChild(nameInp);
+    const tdUnit=document.createElement('td'); tdUnit.className='td-unit';
+    const unitInp=document.createElement('input'); unitInp.type='text'; unitInp.className='cell-input'; unitInp.value=item.unit;
+    unitInp.addEventListener('change',()=>{item.unit=unitInp.value.trim()||item.unit;save();}); tdUnit.appendChild(unitInp);
+    const tdQty=document.createElement('td'); tdQty.className='td-qty';
+    const qtyInp=document.createElement('input'); qtyInp.type='number'; qtyInp.min='0'; qtyInp.value=item.qty||''; qtyInp.placeholder='0';
+    qtyInp.addEventListener('input',()=>{item.qty=qtyInp.value;save();}); qtyInp.addEventListener('focus',()=>qtyInp.select()); tdQty.appendChild(qtyInp);
+    const tdDel=document.createElement('td'); tdDel.className='td-del';
+    const delBtn=document.createElement('button'); delBtn.className='del-btn'; delBtn.title='Удалить'; delBtn.innerHTML='×';
+    delBtn.onclick=()=>{state.splice(idx,1);save();render();}; tdDel.appendChild(delBtn);
+    tr.append(tdName,tdUnit,tdQty,tdDel); tbody.appendChild(tr);
+  });
+}
+function addItem(){
+  const nameEl=document.getElementById('new-name'); const unitEl=document.getElementById('new-unit');
+  const name=nameEl.value.trim(); if(!name){nameEl.focus();return;}
+  state.push({name,unit:unitEl.value.trim()||'шт',qty:''}); nameEl.value=''; unitEl.value=''; save(); render();
+}
+function clearQty(){state.forEach(item=>{item.qty='';});save();render();}
+function openCopy(){
+  let lines=['Доброе утро, поднимите до 16:00, пожалуйста:',''];
+  state.forEach(item=>{const q=Number(item.qty); if(!isNaN(q)&&q>0) lines.push(`${item.name} — ${q} ${item.unit}`);});
+  if(lines.length===2) lines.push('Нет позиций с указанным количеством');
+  lines.push(''); lines.push('Спасибо!');
+  document.getElementById('modal-title').textContent='Готовое сообщение';
+  document.getElementById('modal-text').value=lines.join('\n');
+  document.getElementById('modal').classList.add('open');
+  setTimeout(()=>document.getElementById('modal-text').select(),80);
+}
+function closeModal(){document.getElementById('modal').classList.remove('open');}
+function copyModal(){
+  const ta=document.getElementById('modal-text'); const btn=document.getElementById('modal-copy-btn'); ta.select();
+  navigator.clipboard.writeText(ta.value).catch(()=>document.execCommand('copy'));
+  btn.textContent='Скопировано'; setTimeout(()=>btn.textContent='Копировать',2000);
+}
+document.getElementById('modal').addEventListener('click',e=>{if(e.target===document.getElementById('modal'))closeModal();});
+document.getElementById('new-name').addEventListener('keydown',e=>{if(e.key==='Enter')addItem();});
+document.getElementById('new-unit').addEventListener('keydown',e=>{if(e.key==='Enter')addItem();});
+if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('./service-worker.js');});}
+load();
+</script>
+</body>
+</html>
